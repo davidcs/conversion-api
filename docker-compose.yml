@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conversion_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: conversion_db
+      DB_PORT: 5432
+      PORT: 3000
+    depends_on:
+      - db
+    volumes:
+      - .:/app
+      - /app/node_modules # evita sobrescrever os módulos dentro do container
+    command: npm run dev
+
+volumes:
+  db_data:
